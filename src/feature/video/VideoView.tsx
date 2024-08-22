@@ -22,6 +22,7 @@ import { SELF_VIDEO_ID } from './video-constants';
 import { CanvasContainer } from './CanvasContainer';
 import './video.scss';
 import { useRenderVideo } from './hooks/useRenderVideo';
+import { useStableCanvasElement } from './hooks/useStableCanvasElement';
 
 interface Props {
   isRecieveSharing: boolean;
@@ -33,8 +34,7 @@ export const VideoView = ({ isRecieveSharing }: Props) => {
     mediaStream,
     video: { decode: isVideoDecodeReady }
   } = useContext(ZoomMediaContext);
-  const videoWrapperRef = useRef<HTMLDivElement | null>(null);
-  const videoRef = useRef<HTMLCanvasElement | null>(null);
+  const { videoRef, videoWrapperRef } = useStableCanvasElement('gallery');
   const canvasDimension = useCanvasDimension(mediaStream, videoWrapperRef, videoRef);
   const { page, pageSize, totalPage, totalSize, setPage } = usePagination(zmClient, canvasDimension);
   const { visibleParticipants, layout } = useGalleryLayout(
@@ -74,7 +74,15 @@ export const VideoView = ({ isRecieveSharing }: Props) => {
         'video-container-in-sharing': isRecieveSharing
       })}
     >
-      <CanvasContainer videoWrapperRef={videoWrapperRef} videoRef={videoRef} />
+      <CanvasContainer
+        videoWrapperRef={videoWrapperRef}
+        wrapperClassName="video-canvas-wrapper"
+        videoRef={videoRef}
+        width="800"
+        height="600"
+        className="video-canvas"
+        id="video-canvas"
+      />
       {selfVideoLayout && mediaStream?.isRenderSelfViewWithVideoElement() && (
         <video
           id={SELF_VIDEO_ID}

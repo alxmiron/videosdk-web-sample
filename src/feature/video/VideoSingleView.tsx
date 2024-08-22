@@ -21,6 +21,7 @@ import { usePrevious } from '../../hooks';
 import './video.scss';
 import { isShallowEqual } from '../../utils/util';
 import { CanvasContainer } from './CanvasContainer';
+import { useStableCanvasElement } from './hooks/useStableCanvasElement';
 
 interface Props {
   isRecieveSharing: boolean;
@@ -32,14 +33,14 @@ export const VideoSingleView = ({ isRecieveSharing }: Props) => {
     mediaStream,
     video: { decode: isVideoDecodeReady }
   } = useContext(ZoomMediaContext);
-  const videoWrapperRef = useRef<HTMLDivElement | null>(null);
-  const videoRef = useRef<HTMLCanvasElement | null>(null);
-  const selfVideoCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { videoRef, videoWrapperRef } = useStableCanvasElement('self-view');
+  const { videoRef: selfVideoCanvasRef, videoWrapperRef: selfVideoWrapperRef } =
+    useStableCanvasElement('active-speaker');
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeVideo, setActiveVideo] = useState<number>(mediaStream?.getActiveVideoId() ?? 0);
   const previousActiveUser = useRef<Participant>();
   const canvasDimension = useCanvasDimension(mediaStream, videoWrapperRef, videoRef);
-  const selfCanvasDimension = useCanvasDimension(mediaStream, null, selfVideoCanvasRef);
+  const selfCanvasDimension = useCanvasDimension(mediaStream, selfVideoWrapperRef, selfVideoCanvasRef);
   const networkQuality = useNetworkQuality(zmClient);
   const previousCanvasDimension = usePrevious(canvasDimension);
 
@@ -69,7 +70,7 @@ export const VideoSingleView = ({ isRecieveSharing }: Props) => {
     [participants, activeVideo, zmClient]
   );
 
-  const isCurrentUserStartedVideo = zmClient.getCurrentUserInfo()?.bVideoOn;
+  const isCurrentUserStartedVideo = true; // zmClient.getCurrentUserInfo()?.bVideoOn;
   useEffect(() => {
     if (mediaStream && videoRef.current) {
       if (activeUser?.bVideoOn !== previousActiveUser.current?.bVideoOn) {
@@ -169,19 +170,28 @@ export const VideoSingleView = ({ isRecieveSharing }: Props) => {
           })}
         />
       ) : (
-        <canvas
+        <CanvasContainer
+          videoWrapperRef={selfVideoWrapperRef}
+          wrapperClassName={classnames('self-video-wrapper', {
+            'single-self-video-wrapper': participants.length === 1,
+            'self-video-wrapper-show': isCurrentUserStartedVideo
+          })}
+          videoRef={selfVideoCanvasRef}
           id={SELF_VIDEO_ID}
           width="254"
           height="143"
-          className={classnames('self-video', {
-            'single-self-video': participants.length === 1,
-            'self-video-show': isCurrentUserStartedVideo
-          })}
-          ref={selfVideoCanvasRef}
         />
       )}
       <div className="single-video-wrap">
-        <CanvasContainer videoWrapperRef={videoWrapperRef} videoRef={videoRef} />
+        <CanvasContainer
+          videoWrapperRef={videoWrapperRef}
+          wrapperClassName="video-canvas-wrapper"
+          videoRef={videoRef}
+          width="800"
+          height="600"
+          className="video-canvas"
+          id="video-canvas"
+        />
 
         <AvatarActionContext.Provider value={avatarActionState}>
           {activeUser && (
