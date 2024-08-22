@@ -24,17 +24,17 @@ import './video.scss';
 import { useRenderVideo } from './hooks/useRenderVideo';
 
 interface Props {
-  videoRef: React.MutableRefObject<HTMLCanvasElement | null>;
-  videoWrapperRef: React.MutableRefObject<HTMLDivElement | null>;
   isRecieveSharing: boolean;
 }
 
-export const VideoView = ({ videoWrapperRef, videoRef, isRecieveSharing }: Props) => {
+export const VideoView = ({ isRecieveSharing }: Props) => {
   const zmClient = useContext(ZoomContext);
   const {
     mediaStream,
     video: { decode: isVideoDecodeReady }
   } = useContext(ZoomMediaContext);
+  const videoWrapperRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLCanvasElement | null>(null);
   const canvasDimension = useCanvasDimension(mediaStream, videoWrapperRef, videoRef);
   const { page, pageSize, totalPage, totalSize, setPage } = usePagination(zmClient, canvasDimension);
   const { visibleParticipants, layout } = useGalleryLayout(

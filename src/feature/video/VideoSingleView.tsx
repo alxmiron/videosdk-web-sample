@@ -23,18 +23,17 @@ import { isShallowEqual } from '../../utils/util';
 import { CanvasContainer } from './CanvasContainer';
 
 interface Props {
-  videoRef: React.MutableRefObject<HTMLCanvasElement | null>;
-  videoWrapperRef: React.MutableRefObject<HTMLDivElement | null>;
   isRecieveSharing: boolean;
 }
 
-export const VideoSingleView = ({ videoRef, videoWrapperRef, isRecieveSharing }: Props) => {
+export const VideoSingleView = ({ isRecieveSharing }: Props) => {
   const zmClient = useContext(ZoomContext);
   const {
     mediaStream,
     video: { decode: isVideoDecodeReady }
   } = useContext(ZoomMediaContext);
-
+  const videoWrapperRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLCanvasElement | null>(null);
   const selfVideoCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeVideo, setActiveVideo] = useState<number>(mediaStream?.getActiveVideoId() ?? 0);

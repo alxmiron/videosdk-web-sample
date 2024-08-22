@@ -29,8 +29,6 @@ interface Props extends RouteComponentProps {
 }
 
 const VideoContainer = ({ disableMultipleVideos }: Props) => {
-  const videoWrapperRef = useRef<HTMLDivElement | null>(null);
-  const videoRef = useRef<HTMLCanvasElement | null>(null);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
   const { hasPiPOpened } = usePiPContext();
   const [isRecieveSharing, setIsRecieveSharing] = useState(false);
@@ -38,9 +36,7 @@ const VideoContainer = ({ disableMultipleVideos }: Props) => {
   return (
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
-      {!hasPiPOpened && (
-        <VideoSingleView videoRef={videoRef} videoWrapperRef={videoWrapperRef} isRecieveSharing={isRecieveSharing} />
-      )}
+      {!hasPiPOpened && <VideoSingleView isRecieveSharing={isRecieveSharing} />}
       <VideoSinglePiP />
       <VideoFooter
         className="video-operations"
